@@ -640,9 +640,6 @@ fabric.properties
 # End of https://www.toptal.com/developers/gitignore/api/rider,macos,aspnetcore,csharp
 
 # DB
-Database
-Database/
-Database/*
 *.db
 *.db-shm
 *.db-wal
