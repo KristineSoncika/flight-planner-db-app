@@ -1,5 +1,7 @@
+using FlightPlanner.Context;
 using FlightPlanner.Filters;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +36,10 @@ builder.Services.AddSwaggerGen(option =>
 });
 builder.Services.AddAuthentication("BasicAuthentication")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthorisationHandler>("BasicAuthentication", null);
+
+var connectionString = builder.Configuration.GetConnectionString("FlightPlannerConnection");
+builder.Services.AddDbContext<FlightPlannerDbContext>(options =>
+    options.UseSqlite(connectionString));
 
 var app = builder.Build();
 

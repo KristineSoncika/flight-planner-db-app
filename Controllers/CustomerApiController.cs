@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+using FlightPlanner.Context;
 using FlightPlanner.Models;
-using FlightPlanner.Repositories;
 using FlightPlanner.Validations;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NuGet.Protocol;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlanner.Controllers;
 
@@ -16,12 +10,39 @@ namespace FlightPlanner.Controllers;
 [ApiController]
 public class CustomerApiController : ControllerBase
 {
+    private readonly FlightPlannerDbContext _context;
+
+    public CustomerApiController(FlightPlannerDbContext context)
+    {
+        _context = context;
+    }
+    
     [Route("airports")]
     [HttpGet]
     public IActionResult GetAirport(string search)
     {
-        var searchResult = FlightRepository.FindAirport(search);
-        return Ok(searchResult);
+        var airports = new List<Airport>();
+        var formattedPhrase = search.ToLower().Trim();
+        
+        foreach (var airport in _context.Airports)
+        {
+            if (airport.City.ToLower().Contains(formattedPhrase) ||
+                airport.Country.ToLower().Contains(formattedPhrase) ||
+                airport.AirportCode.ToLower().Contains(formattedPhrase))
+            {
+                airports.Add(airport);
+                return Ok(airports.ToArray());
+            }
+            if (airport.City.ToLower().Contains(formattedPhrase) ||
+                airport.Country.ToLower().Contains(formattedPhrase) ||
+                airport.AirportCode.ToLower().Contains(formattedPhrase))
+            {
+                airports.Add(airport);
+                return Ok(airports.ToArray());
+            }
+        }
+        
+        return Ok(airports.ToArray());
     }
     
     [Route("flights/search")]
@@ -34,15 +55,36 @@ public class CustomerApiController : ControllerBase
             return BadRequest();
         }
         
-        var result = FlightRepository.SearchFlight(flightSearch); 
-        return Ok(result);
+        var page = 0;
+        var totalItems = 0;
+        var items = new List<Flight>();
+        
+        var flight = _context.Flights
+            .Include(flight => flight.From)
+            .Include(flight => flight.To)
+            .FirstOrDefault(flight => flight.DepartureTime.Substring(0, 10) == flightSearch.DepartureDate &&
+                                      flight.From.AirportCode == flightSearch.From &&
+                                      flight.To.AirportCode == flightSearch.To);
+
+        if (flight != null)
+        {
+            items.Add(flight);
+            totalItems++;
+            page++;
+        }
+
+        var pageResult = new PageResult(page, totalItems, items.ToArray());
+        return Ok(pageResult);
     }
     
     [Route("flights/{id:int}")]
     [HttpGet]
     public IActionResult GetFlight(int id)
     {
-        var flight = FlightRepository.GetFlight(id);
+        var flight = _context.Flights
+            .Include(flight => flight.From)
+            .Include(flight => flight.To)
+            .FirstOrDefault(flight => flight.Id == id);
         
         if (flight == null)
         {
