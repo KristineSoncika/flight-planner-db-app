@@ -1,4 +1,5 @@
 using FlightPlanner.Context;
+using FlightPlanner.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlanner.Controllers;
@@ -7,20 +8,17 @@ namespace FlightPlanner.Controllers;
 [ApiController]
 public class TestingApiController : ControllerBase
 {
-    private readonly FlightPlannerDbContext _context;
+    private readonly FlightRepository _flightRepository;
 
-    public TestingApiController(FlightPlannerDbContext context)
+    public TestingApiController(FlightRepository flightRepository)
     {
-        _context = context;
+        _flightRepository = flightRepository;
     }
     
     [HttpPost]
     public IActionResult Clear()
     {
-        _context.Flights.RemoveRange(_context.Flights);
-        _context.Airports.RemoveRange(_context.Airports);
-        _context.SaveChanges();
-        
+        _flightRepository.Clear();
         return Ok();
     }
 }
