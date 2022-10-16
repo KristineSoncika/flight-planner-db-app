@@ -74,28 +74,14 @@ public class FlightRepository
 
     public List<Airport> FindAirport(string search)
     {
-        var airports = new List<Airport>();
         var formattedPhrase = search.ToLower().Trim();
-        
-        foreach (var airport in _context.Airports)
-        {
-            if (airport.City.ToLower().Contains(formattedPhrase) ||
-                airport.Country.ToLower().Contains(formattedPhrase) ||
-                airport.AirportCode.ToLower().Contains(formattedPhrase))
-            {
-                airports.Add(airport);
-                return airports.ToList();
-            }
-            if (airport.City.ToLower().Contains(formattedPhrase) ||
-                airport.Country.ToLower().Contains(formattedPhrase) ||
-                airport.AirportCode.ToLower().Contains(formattedPhrase))
-            {
-                airports.Add(airport);
-                return airports.ToList();
-            }
-        }
-        
-        return airports.ToList();
+
+        var airports = _context.Airports
+            .Where(airport => airport.City.ToLower().Contains(formattedPhrase) || 
+                              airport.Country.ToLower().Contains(formattedPhrase) || 
+                              airport.AirportCode.ToLower().Contains(formattedPhrase)).ToList();
+
+        return airports;
     }
 
     public PageResult SearchFlight(FlightSearch search)

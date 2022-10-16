@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlanner.Context;
 
-public class FlightPlannerDbContext: DbContext    
+public class FlightPlannerDbContext: DbContext
 {
-    public FlightPlannerDbContext(DbContextOptions<FlightPlannerDbContext> options) : 
+    public FlightPlannerDbContext(DbContextOptions options) :
         base(options) { }
     
     public DbSet<Flight> Flights { get; set; }
